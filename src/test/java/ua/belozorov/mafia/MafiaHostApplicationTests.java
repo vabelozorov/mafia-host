@@ -1,4 +1,4 @@
-package ua.belozorov.mafia_host;
+package ua.belozorov.mafia;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

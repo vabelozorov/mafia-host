@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: Mafia Host API
+  description: Mafia Host API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/
+    description: Locally launched server
+
+paths:
+  /game:
+    post:
+      tags:
+        - Game
+      summary: Create a new game
+      operationId: createGame
+      responses:
+        '201':
+          description: The created game object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: Created game's ID
+                required:
+                  - id
+    get:
+      tags:
+        - Game
+      summary: Get a game by ID
+      operationId: getGame
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: The game object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResponse'
+components:
+  schemas:
+    GameResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        state:
+          $ref: '#/components/schemas/GameState'
+      required:
+        - id
+        - state
+    GameState:
+      type: string
+      enum:
+        - assigning_roles
