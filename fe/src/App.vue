@@ -15,9 +15,3 @@ import AppBar from '@/components/AppBar.vue'
 
     </v-app>
 </template>
-
-<style scoped>
-  .mytitle {
-    font-size: 2rem;
-  }
-</style>
