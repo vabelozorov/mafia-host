@@ -16,7 +16,8 @@
     "openapi-zod-client": "^1.18.1",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3",
-    "vuetify": "^3.6.13"
+    "vuetify": "^3.6.13",
+    "vuetify-toast-snackbar": "^0.6.1"
   },
   "devDependencies": {
     "@mdi/font": "^7.4.47",
