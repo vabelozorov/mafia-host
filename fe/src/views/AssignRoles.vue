@@ -7,8 +7,7 @@
             Assign Roles to Players
           </v-card-title>
 
-          <!-- Oval Player Layout -->
-          <div class="position-relative mx-auto mb-12" :style="containerStyle">
+          <div v-if="game" class="position-relative mx-auto mb-12" :style="containerStyle">
             <!-- Center Buttons -->
             <div
               :style="{
@@ -43,8 +42,8 @@
               <div
                 :style="{
                   position: 'absolute',
-                  left: `${getPosition(index, players.length).x}px`,
-                  top: `${getPosition(index, players.length).y}px`,
+                  left: `${getPosition(index, totalPlayers).x}px`,
+                  top: `${getPosition(index, totalPlayers).y}px`,
                   transform: 'translate(-50%, -50%)',
                   zIndex: hoveredIndex === index ? 2 : 1
                 }"
@@ -72,6 +71,8 @@
                       label="Role"
                       variant="outlined"
                       density="compact"
+                      item-title="name"
+                      item-value="name"
                       @update:model-value="(newRole) => updateRole(index, newRole)"
                     ></v-select>
                   </v-card-text>
@@ -115,8 +116,8 @@
 
 <script setup lang="ts">
 import { gameApi } from '@/api/http';
-import type { Game, GameState } from '@/model/gameModels';
-import { ref, computed, onMounted } from 'vue';
+import type { Game, } from '@/model/gameModels';
+import { ref, computed, onMounted, watch } from 'vue';
 
 const props = defineProps({
   id: {
@@ -124,30 +125,6 @@ const props = defineProps({
     required: true
   }
 });
-
-// Define types
-type Role = 'citizen' | 'sheriff' | 'don' | 'mafia' | null;
-
-interface Player {
-  name: string;
-  role: Role;
-}
-
-interface RoleCount {
-  citizen: number;
-  sheriff: number;
-  don: number;
-  mafia: number;
-}
-
-// Constants
-const TOTAL_PLAYERS = 12;
-const INITIAL_ROLES: RoleCount = {
-  citizen: 7,
-  sheriff: 1,
-  don: 1,
-  mafia: 3
-};
 
 // Container dimensions
 const CONTAINER_WIDTH = 1000;
@@ -161,16 +138,37 @@ const containerStyle = {
   position: 'relative' as const
 };
 
-// Player state
-const players = ref<Player[]>(
-  Array(TOTAL_PLAYERS).fill(undefined).map(() => ({
-    name: '',
-    role: null
-  }))
-);
+interface Player {
+  name: string;
+  role: string | null;
+}
 
+const game = ref<Game | null>(null);
+const players = ref<Player[]>([]);
 const hoveredIndex = ref<number | null>(null);
 const selectedPlayerIndex = ref<number | null>(null);
+const remainingRoles = ref<Record<string, number>>({});
+
+const totalPlayers = computed(() => {
+  if (!game.value) return 0;
+  return game.value.roles.reduce((sum, role) => sum + role.count, 0);
+});
+
+// Initialize players and remaining roles when game data is loaded
+watch(game, (newGame) => {
+  if (newGame) {
+    // Initialize remaining roles
+    remainingRoles.value = Object.fromEntries(
+      newGame.roles.map(role => [role.name, role.count])
+    );
+
+    // Initialize players array
+    players.value = Array(totalPlayers.value).fill(undefined).map(() => ({
+      name: '',
+      role: null
+    }));
+  }
+}, { immediate: true });
 
 const snackbar = ref({
   show: false,
@@ -186,44 +184,26 @@ const showNotification = (text: string, color: string = 'success') => {
   };
 };
 
-// Track remaining roles
-const remainingRoles = ref<RoleCount>({ ...INITIAL_ROLES });
-
-// Available roles for select
-const availableRoles = [
-  { title: 'Citizen', value: 'citizen' },
-  { title: 'Sheriff', value: 'sheriff' },
-  { title: 'Don', value: 'don' },
-  { title: 'Mafia', value: 'mafia' }
-] as const;
-
-// New function to check if all roles are unassigned
 const allRolesUnassigned = computed(() => {
   return players.value.every(player => player.role === null);
 });
 
-function generatePlayerLabel (index: number): string {
-  // Get 2-digit representation of index (with leading zero if needed)
+function generatePlayerLabel(index: number): string {
   const indexStr = (index + 1).toString().padStart(2, '0');
-  
-  // Generate 4 random letters
   const letters = Array(4)
     .fill(null)
     .map(() => String.fromCharCode(65 + Math.floor(Math.random() * 26)))
     .join('');
-    
   return `${indexStr}-${letters}`;
 }
 
-// Function to assign random roles
 const assignRandomRoles = () => {
-  // Create array of all roles based on INITIAL_ROLES
-  const allRoles: Role[] = [];
-  Object.entries(INITIAL_ROLES).forEach(([role, count]) => {
-    for (let i = 0; i < count; i++) {
-      allRoles.push(role as Role);
-    }
-  });
+  if (!game.value) return;
+
+  // Create array of all roles based on their counts
+  const allRoles: string[] = game.value.roles.flatMap(role => 
+    Array(role.count).fill(role.name)
+  );
 
   // Shuffle array
   const shuffledRoles = [...allRoles].sort(() => Math.random() - 0.5);
@@ -237,10 +217,13 @@ const assignRandomRoles = () => {
   showNotification('Roles assigned randomly');
 };
 
-// Function to clear all roles
 const clearAllRoles = () => {
+  if (!game.value) return;
+
   // Reset remaining roles
-  remainingRoles.value = { ...INITIAL_ROLES };
+  remainingRoles.value = Object.fromEntries(
+    game.value.roles.map(role => [role.name, role.count])
+  );
   
   // Clear all player roles
   players.value.forEach(player => {
@@ -253,30 +236,24 @@ const clearAllRoles = () => {
   showNotification('All roles cleared');
 };
 
-// Function to handle role swapping
 const selectPlayerForSwap = (index: number) => {
   if (selectedPlayerIndex.value === null) {
-    // First player selected
     if (players.value[index].role) {
       selectedPlayerIndex.value = index;
     }
   } else if (selectedPlayerIndex.value === index) {
-    // Deselect if clicking the same player
     selectedPlayerIndex.value = null;
   } else {
-    // Second player selected - perform swap
     const firstPlayer = players.value[selectedPlayerIndex.value];
     const secondPlayer = players.value[index];
 
     if (firstPlayer.role && secondPlayer.role) {
-      // Swap roles
       const tempRole = firstPlayer.role;
       firstPlayer.role = secondPlayer.role;
       secondPlayer.role = tempRole;
       showNotification('Roles swapped successfully');
     }
 
-    // Clear selection
     selectedPlayerIndex.value = null;
   }
 };
@@ -290,21 +267,24 @@ const getPosition = (index: number, total: number) => {
   };
 };
 
-const getTeamColor = (role: Role): string => {
-  if (!role) return 'grey-lighten-3';
-  return ['citizen', 'sheriff'].includes(role) ? 'red-lighten-4' : 'grey-darken-3';
+const getTeamColor = (roleName: string | null): string => {
+  if (!roleName || !game.value) return 'grey-lighten-3';
+  const role = game.value.roles.find(r => r.name === roleName);
+  return role?.team === 'red' ? 'red-lighten-4' : 'grey-darken-3';
 };
 
 const getAvailableRolesForPlayer = (player: Player) => {
-  return availableRoles.filter(roleOption => {
+  if (!game.value) return [];
+  
+  return game.value.roles.filter(role => {
     // Always include the player's current role in options
-    if (player.role === roleOption.value) return true;
+    if (player.role === role.name) return true;
     // Include roles that have remaining count > 0
-    return remainingRoles.value[roleOption.value] > 0;
+    return remainingRoles.value[role.name] > 0;
   });
 };
 
-const updateRole = (playerIndex: number, newRole: Role) => {
+const updateRole = (playerIndex: number, newRole: string | null) => {
   const oldRole = players.value[playerIndex].role;
   
   // Return the old role to the pool if it exists
@@ -325,6 +305,8 @@ const updateRole = (playerIndex: number, newRole: Role) => {
 };
 
 const isValidConfiguration = computed(() => {
+  if (!game.value) return false;
+  
   const allPlayersNamed = players.value.every(p => p.name.trim());
   const allRolesAssigned = players.value.every(p => p.role);
   const allRolesUsed = Object.values(remainingRoles.value).every(count => count === 0);
@@ -361,16 +343,10 @@ const submitConfiguration = async () => {
   }
 };
 
-const game = ref<Game | null>(null)
-
 onMounted(() => {
-  
   gameApi.getGame(props.id)
-    .then(r => game.value = r)                    
-  ;
-
+    .then(r => game.value = r);
 });
-
 </script>
 
 <style scoped>
