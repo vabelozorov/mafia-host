@@ -62,7 +62,7 @@
   </template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
   import type { Player } from '@/model/gameModels';
   
   interface GameInfo {
@@ -115,10 +115,38 @@
     return role?.team === 'red' ? 'red-lighten-4' : 'grey-darken-3';
   };
   
-  const availableRoles = (player: Player) => {
-    if (!props.game) return [];
-    return props.game.roles;
-  };
+// New computed property to track role counts
+const roleCountMap = computed(() => {
+  const counts = new Map<string, number>();
+  if (!props.game) return counts;
+  
+  // Initialize counts for all roles
+  props.game.roles.forEach(role => {
+    counts.set(role.name, 0);
+  });
+  
+  // Count current role assignments
+  props.players.forEach(player => {
+    if (player.role) {
+      counts.set(player.role, (counts.get(player.role) || 0) + 1);
+    }
+  });
+  
+  return counts;
+});
+
+const availableRoles = (currentPlayer: Player) => {
+  if (!props.game) return [];
+  
+  return props.game.roles.filter(role => {
+    const currentCount = roleCountMap.value.get(role.name) || 0;
+    const adjustedCount = currentPlayer.role === role.name ? 
+      currentCount - 1 : 
+      currentCount;
+    
+    return adjustedCount < role.count;
+  });
+};
   
   const onPlayerClick = (index: number) => {
     emit('player-click', index);

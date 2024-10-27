@@ -14,11 +14,10 @@ public class ClassicalGame implements Game {
     private final List<Player> players = new ArrayList<>();
     private List<Round> gameRounds = new ArrayList<>();
 
-    public ClassicalGame(Long id) {
+    public ClassicalGame(Long id, int playerNumber) {
         this.id = id;
 
-        this.gameConfig = GameConfig.builder(12).build();
-//        this.gameRounds = new ArrayList<>();
+        this.gameConfig = GameConfig.builder(playerNumber).build();
 
         initializeStates();
         this.currentState = states.get(GameStates.ASSIGNING_ROLES);
