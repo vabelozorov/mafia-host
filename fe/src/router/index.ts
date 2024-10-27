@@ -14,6 +14,12 @@ const router = createRouter({
       name: 'assignRoles',
       component: () => import('@/views/AssignRoles.vue'),
       props: route => ({id: Number(route.params.id)})
+    },    
+    {
+      path: '/games/:id/firstNight',
+      name: 'firstNight',
+      component: () => import('@/views/FirstNight.vue'),
+      props: route => ({id: Number(route.params.id)})
     },
   ]
 })

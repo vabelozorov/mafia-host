@@ -15,11 +15,27 @@ export const gameApi = {
   async createGame(): Promise<number> {
     return http.createGame(undefined)
             .then(r => r.id);
+  },
+
+  async assignRoles(gameId: number, players: { name: string; role: string; }[]):Promise<void> {
+    http.submitPlayersConfiguration(
+      {
+        players: players.map(p => ({ 
+          name: p.name, 
+          role: p.role 
+        }))
+      },
+      {
+        params: {
+          gameId: gameId
+        }
+      }
+    );
   }
 };
 
 // Mapper functions
-const mapResponseToGame = (response: typeof schemas.GameResponse['_type']): Game => {
+const mapResponseToGame = (response: typeof schemas.GameResp['_type']): Game => {
 
   if (!isValidGameState(response.state)) {
     throw new Error(`Invalid game state: ${response.state}`);

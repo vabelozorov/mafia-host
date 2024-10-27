@@ -1,11 +1,11 @@
 package ua.belozorov.mafia.host.gameengine;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum GameState {
   
-  ASSIGNING_ROLES("assigning_roles");
+  ASSIGNING_ROLES("assigning_roles"), FIRST_NIGHT("first_night");
 
   private final String value;
 

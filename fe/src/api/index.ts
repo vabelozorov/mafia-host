@@ -1,7 +1,7 @@
 import { makeApi, Zodios, type ZodiosOptions } from "@zodios/core";
 import { z } from "zod";
 
-type GameResponse = {
+type GameResp = {
   id: number;
   state: string;
   gameConfig: {
@@ -18,7 +18,7 @@ const RoleDescription: z.ZodType<RoleDescription> = z
   .object({ name: z.string(), team: z.string(), count: z.number().int() })
   .strict()
   .passthrough();
-const GameResponse: z.ZodType<GameResponse> = z
+const GameResp: z.ZodType<GameResp> = z
   .object({
     id: z.number().int(),
     state: z.string(),
@@ -29,10 +29,24 @@ const GameResponse: z.ZodType<GameResponse> = z
   })
   .strict()
   .passthrough();
+const PlayerAssignmentReq = z
+  .object({
+    players: z
+      .array(
+        z
+          .object({ name: z.string().min(1).max(50), role: z.string() })
+          .strict()
+          .passthrough()
+      )
+      .min(1),
+  })
+  .strict()
+  .passthrough();
 
 export const schemas = {
   RoleDescription,
-  GameResponse,
+  GameResp,
+  PlayerAssignmentReq,
 };
 
 const endpoints = makeApi([
@@ -42,6 +56,26 @@ const endpoints = makeApi([
     alias: "createGame",
     requestFormat: "json",
     response: z.object({ id: z.number().int() }).strict().passthrough(),
+  },
+  {
+    method: "post",
+    path: "/games/:gameId/players",
+    alias: "submitPlayersConfiguration",
+    description: `Assigns roles to all players in the game, including their names and positions`,
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "body",
+        type: "Body",
+        schema: PlayerAssignmentReq,
+      },
+      {
+        name: "gameId",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
+    response: z.void(),
   },
   {
     method: "get",
@@ -55,7 +89,7 @@ const endpoints = makeApi([
         schema: z.number().int(),
       },
     ],
-    response: GameResponse,
+    response: GameResp,
   },
 ]);
 

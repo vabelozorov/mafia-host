@@ -117,6 +117,7 @@
 <script setup lang="ts">
 import { gameApi } from '@/api/http';
 import type { Game, } from '@/model/gameModels';
+import routeForState from '@/router/routeGameState';
 import { ref, computed, onMounted, watch } from 'vue';
 
 const props = defineProps({
@@ -316,24 +317,24 @@ const isValidConfiguration = computed(() => {
 
 const submitConfiguration = async () => {
   try {
-    const response = await fetch(`/api/games/${props.id}/roles`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        players: players.value.map(p => ({
-          name: p.name,
-          role: p.role
-        }))
-      })
-    });
 
-    if (!response.ok) {
-      throw new Error('Failed to submit configuration');
+    if (!isValidConfiguration.value) {
+      return
     }
 
-    showNotification('Configuration saved successfully');
+    gameApi.assignRoles(
+        props.id,
+    
+        players.value.map(p => ({
+          name: p.name!,
+          role: p.role!
+        }))
+      
+    )
+    .then(() => gameApi.getGame(props.id))
+    .then(routeForState)
+    ;
+
   } catch (error) {
     if (error instanceof Error) {
       showNotification('Error saving configuration: ' + error.message, 'error');

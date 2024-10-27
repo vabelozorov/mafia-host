@@ -12,6 +12,7 @@ export interface Role {
   
   export enum GameState {
     ASSIGNING_ROLES = 'assigning_roles',
+    FIRST_NIGHT = 'first_night',
   }
   
   // Type predicates if needed

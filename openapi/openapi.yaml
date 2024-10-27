@@ -12,7 +12,7 @@ paths:
   /games:
     post:
       tags:
-        - Game
+        - Games
       summary: Create a new game
       operationId: createGame
       responses:
@@ -32,7 +32,7 @@ paths:
   /games/{id}:
     get:
       tags:
-        - Game
+        - Games
       summary: Get a game by ID
       operationId: getGame
       parameters:
@@ -49,10 +49,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GameResponse'
+                $ref: '#/components/schemas/GameResp'
+  /games/{gameId}/players:
+    post:
+      summary: Submit complete player roles configuration
+      description: Assigns roles to all players in the game, including their names and positions
+      operationId: submitPlayersConfiguration
+      tags:
+        - games
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unique identifier of the game
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayerAssignmentReq'
+      responses:
+        '200':
+          description: Players configuration successfully saved
 components:
   schemas:
-    GameResponse:
+    GameResp:
       type: object
       properties:
         id:
@@ -88,3 +112,36 @@ components:
         - name
         - team
         - count
+    PlayerAssignmentReq:
+      type: object
+      required:
+        - players
+      properties:
+        players:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+              - role
+            properties:
+              name:
+                type: string
+                description: Player's name
+                minLength: 1
+                maxLength: 50
+                example: "01-ABCD"
+              role:
+                type: string
+                description: Role name as defined in game configuration
+                example: "citizen"
+          minItems: 1
+          description: Array of players with their assigned roles. Position is implied by array index.
+      example:
+        players:
+          - name: "01-ABCD"
+            role: "citizen"
+          - name: "02-EFGH"
+            role: "mafia"
+          - name: "03-IJKL"
+            role: "sheriff"
