@@ -3,38 +3,55 @@ import { z } from "zod";
 
 type GameResponse = {
   id: number;
-  state: GameState;
+  state: string;
+  gameConfig: {
+    roles: Array<RoleDescription>;
+  };
 };
-type GameState = "assigning_roles";
+type RoleDescription = {
+  name: string;
+  team: string;
+  count: number;
+};
 
-const GameState = z.literal("assigning_roles");
+const RoleDescription: z.ZodType<RoleDescription> = z
+  .object({ name: z.string(), team: z.string(), count: z.number().int() })
+  .strict()
+  .passthrough();
 const GameResponse: z.ZodType<GameResponse> = z
-  .object({ id: z.number().int(), state: GameState })
+  .object({
+    id: z.number().int(),
+    state: z.string(),
+    gameConfig: z
+      .object({ roles: z.array(RoleDescription) })
+      .strict()
+      .passthrough(),
+  })
   .strict()
   .passthrough();
 
 export const schemas = {
-  GameState,
+  RoleDescription,
   GameResponse,
 };
 
 const endpoints = makeApi([
   {
     method: "post",
-    path: "/game",
+    path: "/games",
     alias: "createGame",
     requestFormat: "json",
     response: z.object({ id: z.number().int() }).strict().passthrough(),
   },
   {
     method: "get",
-    path: "/game",
+    path: "/games/:id",
     alias: "getGame",
     requestFormat: "json",
     parameters: [
       {
         name: "id",
-        type: "Query",
+        type: "Path",
         schema: z.number().int(),
       },
     ],

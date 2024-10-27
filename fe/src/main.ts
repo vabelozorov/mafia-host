@@ -12,4 +12,4 @@ app.use(vuetify)
   .use(router)
   .mount('#app')
 
-app.config.globalProperties.$http = http;
+app.config.globalProperties.$gameApi = http;

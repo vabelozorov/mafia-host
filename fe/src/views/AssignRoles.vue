@@ -114,6 +114,8 @@
 </template>
 
 <script setup lang="ts">
+import { gameApi } from '@/api/http';
+import type { Game, GameState } from '@/model/gameModels';
 import { ref, computed, onMounted } from 'vue';
 
 const props = defineProps({
@@ -359,9 +361,16 @@ const submitConfiguration = async () => {
   }
 };
 
+const game = ref<Game | null>(null)
+
 onMounted(() => {
-  // Any initialization logic can go here
+  
+  gameApi.getGame(props.id)
+    .then(r => game.value = r)                    
+  ;
+
 });
+
 </script>
 
 <style scoped>

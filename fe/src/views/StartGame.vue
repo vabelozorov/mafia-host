@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { useHttp } from '@/useGlobalProperties';
-import type { Game } from '@/model/gameModels'
+import { useGameApi } from '@/useGlobalProperties';
 import routeForState from '@/router/routeGameState.js'
 
-const http = useHttp();
+const gameApi = useGameApi();
 
 function newGame() {
 
-  http.createGame(undefined)
-    .then(r => r.id)
-    .then(id => http.getGame({ queries: { id: id } }))
-    .then(r => ({ id: r.id, state: r.state } as Game ))
+  gameApi.createGame()
+    .then(id => gameApi.getGame(id))
     .then(routeForState)
 
 }

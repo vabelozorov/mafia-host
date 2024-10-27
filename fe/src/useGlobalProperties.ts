@@ -1,10 +1,10 @@
 import { getCurrentInstance } from 'vue';
 
-export function useHttp() {
+export function useGameApi() {
   const instance = getCurrentInstance();
   if (!instance) {
     throw new Error('useGlobalProperties must be called within a setup function');
   }
   
-  return instance.appContext.config.globalProperties.$http;
+  return instance.appContext.config.globalProperties.$gameApi;
 }

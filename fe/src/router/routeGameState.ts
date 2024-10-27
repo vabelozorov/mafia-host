@@ -1,13 +1,17 @@
-import type { Game, GameState } from '@/model/gameModels';
+import { GameState, type Game } from '@/model/gameModels';
 import router from '@/router';
+import type { RouteRecordNameGeneric } from 'vue-router';
 
 const routes : Map<GameState, String> = new Map();
-routes.set('assigning_roles', 'assign');
+routes.set(GameState.ASSIGNING_ROLES, 'assignRoles');
 
 export default function routeForState(game: Game) {
     const path = getStateRoute(game.state);
 
-    router.push(`/games/${game.id}/${path}`)
+    router.push({
+        name: path as RouteRecordNameGeneric,
+        params: {id : game.id.toString()},
+    })
 }
 
  function getStateRoute(state: GameState) : String {

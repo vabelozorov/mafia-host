@@ -9,7 +9,7 @@ servers:
     description: Locally launched server
 
 paths:
-  /game:
+  /games:
     post:
       tags:
         - Game
@@ -25,9 +25,11 @@ paths:
                 properties:
                   id:
                     type: integer
+                    format: int64
                     description: Created game's ID
                 required:
                   - id
+  /games/{id}:
     get:
       tags:
         - Game
@@ -35,10 +37,11 @@ paths:
       operationId: getGame
       parameters:
         - name: id
-          in: query
+          in: path
           required: true
           schema:
             type: integer
+            format: int64
             example: 1
       responses:
         '200':
@@ -54,13 +57,34 @@ components:
       properties:
         id:
           type: integer
+          format: int64
           example: 1
         state:
-          $ref: '#/components/schemas/GameState'
+          type: string
+          example: assigning_roles
+        gameConfig:
+          type: object
+          properties:
+            roles:
+              type: array
+              items:
+                $ref: '#/components/schemas/RoleDescription'
+          required:
+            - roles
       required:
         - id
         - state
-    GameState:
-      type: string
-      enum:
-        - assigning_roles
+        - gameConfig
+    RoleDescription:
+      type: object
+      properties:
+        name:
+          type: string
+        team:
+          type: string
+        count:
+          type: integer
+      required:
+        - name
+        - team
+        - count
