@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGameApi } from '@/useGlobalProperties';
-import routeForState from '@/router/routeGameState.js'
+import routeBasedOnGameState from '@/router/routeGameState.js'
 
 const gameApi = useGameApi();
 
@@ -8,7 +8,7 @@ function newGame() {
 
   gameApi.createGame()
     .then(id => gameApi.getGame(id))
-    .then(routeForState)
+    .then(routeBasedOnGameState)
 
 }
 

@@ -33,7 +33,7 @@ public class GameMapper {
 
     private List<PlayerDto> mapPlayers(List<Player> players) {
         return players.stream()
-                .map(p -> new PlayerDto(p.getName(), p.getRole().name(), p.isAlive()))
+                .map(p -> new PlayerDto(p.getName(), p.getRole().name().toLowerCase(), p.isAlive()))
                 .toList();
     }
 

@@ -7,7 +7,8 @@
             left: `${getPosition(index, players.length).x}px`,
             top: `${getPosition(index, players.length).y}px`,
             transform: 'translate(-50%, -50%)',
-            zIndex: hoveredIndex === index ? 2 : 1
+            zIndex: hoveredIndex === index ? 2 : 1,
+            padding: '12px'
           }"
           @mouseenter="hoveredIndex = index"
           @mouseleave="hoveredIndex = null"
@@ -22,7 +23,9 @@
               'readonly': readOnly
             }"
           >
-            <div class="position-number">{{ player.position + 1 }}</div>
+            <div class="position-number-wrapper">
+              <div class="position-number">{{ player.position + 1 }}</div>
+            </div>
             <v-card-text>
               <v-text-field
                 v-model="player.name"
@@ -59,24 +62,24 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, computed } from 'vue';
-  import type { Game, Player } from '@/model/gameModels';
+  import { ref } from 'vue';
+  import type { Player } from '@/model/gameModels';
   
-// Update the type to only include what we need from Game
-interface GameInfo {
-  roles: {
-    name: string;
-    team: "black" | "red";
-    count: number;
-  }[];
-}
-
-const props = defineProps<{
-  players: Player[];
-  game: GameInfo | null;  // Changed from Game to GameInfo
-  readOnly?: boolean;
-  selectedPlayerIndex?: number | null;
-}>();
+  interface GameInfo {
+    roles: {
+      name: string;
+      team: "black" | "red";
+      count: number;
+    }[];
+  }
+  
+  const props = defineProps<{
+    players: Player[];
+    game: GameInfo | null;
+    readOnly?: boolean;
+    selectedPlayerIndex?: number | null;
+  }>();
+  
   const emit = defineEmits<{
     'update:players': [players: Player[]];
     'player-click': [index: number];
@@ -131,6 +134,7 @@ const props = defineProps<{
     transition: all 0.3s ease;
     cursor: pointer;
     position: relative;
+    overflow: visible !important;
   }
   
   .player-card:hover:not(.readonly) {
@@ -147,10 +151,15 @@ const props = defineProps<{
     box-shadow: 0 0 8px rgba(25, 118, 210, 0.5);
   }
   
-  .position-number {
+  .position-number-wrapper {
     position: absolute;
-    top: -12px;
-    left: -12px;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+  
+  .position-number {
     background-color: #1976D2;
     color: white;
     border-radius: 50%;
@@ -161,6 +170,5 @@ const props = defineProps<{
     justify-content: center;
     font-weight: bold;
     font-size: 14px;
-    z-index: 1;
   }
   </style>

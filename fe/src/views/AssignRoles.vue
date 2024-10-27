@@ -32,7 +32,7 @@
 
             <player-oval-layout
               :players="players"
-              :game="game"
+              :game="{roles: game.roles}"
               :selected-player-index="selectedPlayerIndex"
               @player-click="selectPlayerForSwap"
               @update-role="updateRole"
@@ -77,7 +77,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { gameApi } from '@/api/http';
 import type { Game, Player } from '@/model/gameModels';
-import routeForState from '@/router/routeGameState';
+import routeBasedOnGameState from '@/router/routeGameState';
 import PlayerOvalLayout from '@/components/PlayerOvalLayout.vue';
 
 const props = defineProps({
@@ -227,16 +227,17 @@ const submitConfiguration = async () => {
   try {
     if (!isValidConfiguration.value) return;
 
-    await gameApi.assignRoles(
+    gameApi.assignRoles(
       props.id,
       players.value.map(p => ({
         name: p.name!,
         role: p.role!
       }))
-    );
-    
-    const updatedGame = await gameApi.getGame(props.id);
-    routeForState(updatedGame);
+    )
+    .then(() => gameApi.getGame(props.id))
+    .then(routeBasedOnGameState)
+    ;
+
   } catch (error) {
     if (error instanceof Error) {
       showNotification('Error saving configuration: ' + error.message, 'error');
