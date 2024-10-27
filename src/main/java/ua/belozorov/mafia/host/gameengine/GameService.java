@@ -8,4 +8,6 @@ public interface GameService {
     Game getById(Long id);
 
     void assignPlayers(Long gameId, List<Player> players);
+
+    int nextDay(Long gameId);
 }

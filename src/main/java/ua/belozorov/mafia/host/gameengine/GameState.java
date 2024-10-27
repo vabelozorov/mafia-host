@@ -1,36 +1,35 @@
 package ua.belozorov.mafia.host.gameengine;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.List;
+import java.util.Map;
 
-public enum GameState {
-  
-  ASSIGNING_ROLES("assigning_roles"), FIRST_NIGHT("first_night");
+interface GameState {
 
-  private final String value;
+    GameStates getId();
 
-  GameState(String value) {
-    this.value = value;
-  }
-
-  @JsonValue
-  public String getValue() {
-    return value;
-  }
-
-  @Override
-  public String toString() {
-    return String.valueOf(value);
-  }
-
-  @JsonCreator
-  public static GameState fromValue(String value) {
-    for (GameState b : GameState.values()) {
-      if (b.value.equals(value)) {
-        return b;
-      }
+    default void assignRoles(List<Player> players) {
+        throw new IllegalStateException("Cannot assign roles in current state");
     }
-    throw new IllegalArgumentException("Unexpected value '" + value + "'");
-  }
-}
 
+    default void startNight() {
+        throw new IllegalStateException("Cannot start night in current state");
+    }
+
+    default void processMafiaVotes(Map<Player, Player> mafiaVotes) {
+        throw new IllegalStateException("Cannot process mafia votes in current state");
+    }
+
+    default void startDay() {
+        throw new IllegalStateException("Cannot start day in current state");
+    }
+
+    default void processPlayerSpeech(Player speaker) {
+        throw new IllegalStateException("Cannot process player speech in current state");
+    }
+
+    default void processVoting(Map<Player, Player> votes) {
+        throw new IllegalStateException("Cannot process voting in current state");
+    }
+
+    default void notifyTransitioned() {};
+}

@@ -4,9 +4,20 @@ import { z } from "zod";
 type GameResp = {
   id: number;
   state: string;
+  players: Array<PlayerDto>;
+  rounds: Array<RoundDto>;
   gameConfig: {
+    firstNightDuration: number;
     roles: Array<RoleDescription>;
   };
+};
+type PlayerDto = {
+  name: string;
+  role: string;
+  isAlive: boolean;
+};
+type RoundDto = {
+  id: number;
 };
 type RoleDescription = {
   name: string;
@@ -14,6 +25,14 @@ type RoleDescription = {
   count: number;
 };
 
+const PlayerDto: z.ZodType<PlayerDto> = z
+  .object({ name: z.string(), role: z.string(), isAlive: z.boolean() })
+  .strict()
+  .passthrough();
+const RoundDto: z.ZodType<RoundDto> = z
+  .object({ id: z.number().int() })
+  .strict()
+  .passthrough();
 const RoleDescription: z.ZodType<RoleDescription> = z
   .object({ name: z.string(), team: z.string(), count: z.number().int() })
   .strict()
@@ -22,8 +41,13 @@ const GameResp: z.ZodType<GameResp> = z
   .object({
     id: z.number().int(),
     state: z.string(),
+    players: z.array(PlayerDto),
+    rounds: z.array(RoundDto),
     gameConfig: z
-      .object({ roles: z.array(RoleDescription) })
+      .object({
+        firstNightDuration: z.number().int(),
+        roles: z.array(RoleDescription),
+      })
       .strict()
       .passthrough(),
   })
@@ -44,6 +68,8 @@ const PlayerAssignmentReq = z
   .passthrough();
 
 export const schemas = {
+  PlayerDto,
+  RoundDto,
   RoleDescription,
   GameResp,
   PlayerAssignmentReq,
@@ -55,6 +81,20 @@ const endpoints = makeApi([
     path: "/games",
     alias: "createGame",
     requestFormat: "json",
+    response: z.object({ id: z.number().int() }).strict().passthrough(),
+  },
+  {
+    method: "post",
+    path: "/games/:gameId/day",
+    alias: "nextDay",
+    requestFormat: "json",
+    parameters: [
+      {
+        name: "gameId",
+        type: "Path",
+        schema: z.number().int(),
+      },
+    ],
     response: z.object({ id: z.number().int() }).strict().passthrough(),
   },
   {

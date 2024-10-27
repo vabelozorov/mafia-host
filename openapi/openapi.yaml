@@ -74,6 +74,33 @@ paths:
       responses:
         '200':
           description: Players configuration successfully saved
+  /games/{gameId}/day:
+    post:
+      tags:
+        - Games
+      summary: Triggers the next day in the game
+      operationId: nextDay
+      parameters:
+        - name: gameId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unique identifier of the game
+      responses:
+        '201':
+          description: Day ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: Created day's ID
+                required:
+                  - id
 components:
   schemas:
     GameResp:
@@ -86,19 +113,53 @@ components:
         state:
           type: string
           example: assigning_roles
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerDto'
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoundDto'
         gameConfig:
           type: object
           properties:
+            firstNightDuration:
+              type: integer
+              format: int64
             roles:
               type: array
               items:
                 $ref: '#/components/schemas/RoleDescription'
           required:
+            - firstNightDuration
             - roles
       required:
         - id
         - state
         - gameConfig
+        - players
+        - rounds
+    PlayerDto:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        isAlive:
+          type: boolean
+      required:
+        - name
+        - role
+        - isAlive
+    RoundDto:
+      type: object
+      properties:
+        id:
+          type: integer
+      required:
+        - id
     RoleDescription:
       type: object
       properties:

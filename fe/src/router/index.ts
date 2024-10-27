@@ -21,6 +21,12 @@ const router = createRouter({
       component: () => import('@/views/FirstNight.vue'),
       props: route => ({id: Number(route.params.id)})
     },
+    {
+      path: '/games/:id/day',
+      name: 'day',
+      component: () => import('@/views/DayView.vue'),
+      props: route => ({id: Number(route.params.id)})
+    },
   ]
 })
 

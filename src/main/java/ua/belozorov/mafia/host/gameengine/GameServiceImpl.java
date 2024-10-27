@@ -12,7 +12,7 @@ public class GameServiceImpl implements GameService {
     @Override
     public Long createGame() {
         if (this.currentGame == null) {
-            this.currentGame = new ClassicGame(1L);
+            this.currentGame = new ClassicalGame(1L);
         }
         return this.currentGame.id();
     }
@@ -26,5 +26,11 @@ public class GameServiceImpl implements GameService {
     public void assignPlayers(Long gameId, List<Player> players) {
         var game = getById(gameId);
         game.assignPlayers(players);
+    }
+
+    @Override
+    public int nextDay(Long gameId) {
+        var game = getById(gameId);
+        return game.startDay();
     }
 }

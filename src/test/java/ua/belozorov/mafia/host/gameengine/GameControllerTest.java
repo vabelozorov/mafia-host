@@ -25,7 +25,7 @@ class GameControllerTest {
     @Test
     void getGameById() throws Exception {
 
-        when(gameService.getById(1L)).thenReturn(new ClassicGame(1L));
+        when(gameService.getById(1L)).thenReturn(new ClassicalGame(1L));
 
         mvc.perform(get("/games/1"))
                 .andExpectAll(

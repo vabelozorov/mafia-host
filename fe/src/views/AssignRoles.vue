@@ -116,7 +116,7 @@
 
 <script setup lang="ts">
 import { gameApi } from '@/api/http';
-import type { Game, } from '@/model/gameModels';
+import type { Game, Player} from '@/model/gameModels';
 import routeForState from '@/router/routeGameState';
 import { ref, computed, onMounted, watch } from 'vue';
 
@@ -139,10 +139,7 @@ const containerStyle = {
   position: 'relative' as const
 };
 
-interface Player {
-  name: string;
-  role: string | null;
-}
+
 
 const game = ref<Game | null>(null);
 const players = ref<Player[]>([]);
@@ -164,11 +161,15 @@ watch(game, (newGame) => {
     );
 
     // Initialize players array
-    players.value = Array(totalPlayers.value).fill(undefined).map(() => ({
-      name: '',
-      role: null
-    }));
+    players.value = Array(totalPlayers.value)
+                .fill(undefined)
+                .map((_, index) => ({
+                  name: '',
+                  role: null,
+                  position: index
+                }));
   }
+
 }, { immediate: true });
 
 const snackbar = ref({

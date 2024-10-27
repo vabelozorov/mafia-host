@@ -1,14 +1,20 @@
 package ua.belozorov.mafia.host.gameengine;
 
 import java.util.List;
-import java.util.Map;
 
 public interface Game {
     Long id();
 
-    GameState state();
+    GameStates state();
 
-    Map<Role, Integer> roleConfiguration();
+    GameConfig gameConfig();
 
     void assignPlayers(List<Player> players);
+
+    int startDay();
+
+    List<Player> getPlayers();
+
+    List<Round> getRounds();
+
 }

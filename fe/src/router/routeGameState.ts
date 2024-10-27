@@ -5,6 +5,7 @@ import type { RouteRecordNameGeneric } from 'vue-router';
 const routes : Map<GameState, String> = new Map();
 routes.set(GameState.ASSIGNING_ROLES, 'assignRoles');
 routes.set(GameState.FIRST_NIGHT, 'firstNight');
+routes.set(GameState.DAY, 'day');
 
 export default function routeForState(game: Game) {
     const path = getStateRoute(game.state);
